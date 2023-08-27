@@ -1,0 +1,51 @@
+//import MD5Shadow;
+import java.io.*;
+import java.util.Scanner;  
+import java.util.ArrayList;
+
+public class Cracker
+{
+   public static void main(String args[]) throws Exception
+   {
+        MD5Shadow md5class = new MD5Shadow();
+        File shadow_file = new File("./shadow");
+        InputStream is1 = new FileInputStream(shadow_file);
+        BufferedReader shadow_buf = new BufferedReader(new InputStreamReader(is1));
+        File pass_file = new File("./common-passwords.txt");
+        InputStream is2 = new FileInputStream(pass_file);
+        BufferedReader pass_buf = new BufferedReader(new InputStreamReader(is2));
+        ArrayList<String> shadow_user = new ArrayList<String>();
+        ArrayList<String> shadow_salt = new ArrayList<String>();
+        ArrayList<String> shadow_hash = new ArrayList<String>();
+        String line=shadow_buf.readLine();
+        while(line!=null)
+        {
+            String[] splitter=line.split(":");
+            shadow_user.add(splitter[0]);
+            shadow_salt.add(splitter[1].substring(3,11));
+            shadow_hash.add(splitter[1].substring(12));
+            line=shadow_buf.readLine();
+        }
+        ArrayList<String> passwords = new ArrayList<String>();
+        line=pass_buf.readLine();
+        while(line!=null)
+        {
+            passwords.add(line);
+            line=pass_buf.readLine();
+        }
+        int counter_passwords=passwords.size();
+        int counter_hash=shadow_hash.size();
+        for(int i=0;i<counter_hash;i++)
+        {
+            for(int j=0;j<counter_passwords;j++)
+            {
+                if(shadow_hash.get(i).equals(md5class.crypt(passwords.get(j), shadow_salt.get(i))))
+				{
+					System.out.println("User Found >> " + shadow_user.get(i) + "\nPassword >> "  + passwords.get(j));
+					System.out.println("***************************");
+				}
+            }
+
+        }
+   }
+}
